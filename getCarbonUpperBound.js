@@ -32,14 +32,18 @@ var findMaxCarbonThisWeek = function(cb){
   var formattedDate = getTimeLastWeek();
   var url = base_url + '&start_at=' + formattedDate;
 
+  console.log("Getting data starting at: ", formattedDate);
   request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
       // console.log(JSON.parse(body).results);
       getHighestReading(JSON.parse(body).results, 
         function(carbonHigh){
-          // console.log("Highest Carbon Measurement this week: ", carbonHigh);
+          console.log("Highest Carbon Measurement this week: ", carbonHigh);
           cb(carbonHigh);
         });
+    }
+    else {
+      throw error;
     }
   })
 };
