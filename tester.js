@@ -7,35 +7,62 @@ var moment = require('moment');
 // Max:  1444.30078329347
 // Avg:  1291.6311845485336
 
-var date = new Date(Date.now()); 
-nearestHour(date); 
+function getNearestHour() {
+  var date = new Date(Date.now()); 
 
-function nearestHour(date) {
   date.setHours(date.getHours() + Math.round(date.getMinutes()/60));
   date.setMinutes(0);
   date.setSeconds(0);
-  date.setMilliseconds(0);
 
   //console.log(date.toISOString());
-  console.log(moment(date).utc().format("YYYY-MM-DDTHH:mm:ss") + 'Z');
-  return date;
+  var formattedDate = (moment(date).utc().format("YYYY-MM-DDTHH:mm:ss") + 'Z');
+  return formattedDate;
 }
 
-var makeRequest = function(cb){
-  request('http://www.google.com', function (error, response, body) {
+var getCarbonReading = function(wattimeArray, datestring, cb){
+  for(var i = 0; i < wattimeArray.length; i++){
+    if(wattimeArray[i].timestamp === datestring){
+      cb(wattimeArray[i].carbon);
+      break;
+    }
+  }
+}
+
+var makeRequest = function(){
+  var base_url = 'https://api.watttime.org/api/v1/datapoints/?ba=CAISO&market=DAHR'
+  var formattedDate = getNearestHour();
+  var url = base_url + '&start_at=' + formattedDate;
+
+  request(url, function (error, response, body) {
     if (!error && response.statusCode == 200) {
-      console.log(body)
+      //console.log(JSON.parse(body).results);
+      getCarbonReading(JSON.parse(body).results, formattedDate, 
+        function(carbon){
+          setColorCode(carbon);
+        });
     }
   })
 };
 
-var getColorCode = function(){ 
-  // var mylight = new wifibox('192.168.1.100');
-  // mylight.command(commands.rgbw.hue(Math.floor(Math.random() * 255)));
-  makeRequest(function(data){
-    console.log(data);
-  });
+var setColorCode = function(carbon){
+  
+  // divide current carbon rating by highest seen this month
+  // to get % of maximum, the multiply that % by the hue range to
+  // get the color of the bulb
+  // bulb hue range is 0-255 -- Green - Red range is 90-170 (80 points)
+  // So, multiply % of max by 80 and add the result to 90 to get the correct
+  // point in the range.
+
+  //TODO: Calculate this maximum once per day
+  var percentMax = carbon/1450;
+  if(percentMax > 1){percentMax = 1};
+
+  var hueOffset = Math.floor(80*percentMax);
+  var hue = 80 + hueOffset;
+
+  console.log('Setting hue to ' + hue + ' based on carbon ' + carbon);
+  var mylight = new wifibox('192.168.1.100');
+  mylight.command(commands.rgbw.hue(hue));
 };
 
-// getColorCode();
-// setTimeout(getColorCode, 10000);
+makeRequest();
