@@ -5,7 +5,7 @@ var commands = require('./commands');
 var request = require('request');
 var moment = require('moment');
 
-var weeklyMaxCarbon = 1450;
+var weeklyMaxCarbon = 1405;
 var miLightIP = '192.168.1.100';
 
 function getNearestHour() {
@@ -42,6 +42,9 @@ var makeWattTimeRequest = function(){
           setColorCode(carbon);
         });
     }
+    else {
+      console.log(response);
+    }
   })
 };
 
@@ -65,8 +68,7 @@ var setColorCode = function(carbon){
   mylight.command(commands.rgbw.hue(hue));
 };
 
-// makeRequest();
-// 3600000 in an hour
+// 3600000 Milliseconds in an hour
 setTimeout(function(){
   getCarbonUpperBound(function(maxCarbon){
     console.log("Max carbon reading this week: ", maxCarbon);
@@ -74,10 +76,8 @@ setTimeout(function(){
   });
 }, 3600000);
 
+// Check for new value every 10 minutes
 setTimeout(makeWattTimeRequest, 600000);
 
-getCarbonUpperBound(function(maxCarbon){
-  console.log("Max carbon reading this week: ", maxCarbon);
-  weeklyMaxCarbon = maxCarbon;
-  makeWattTimeRequest();
-});
+// Run to set initial value
+makeWattTimeRequest();
