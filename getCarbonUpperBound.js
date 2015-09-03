@@ -43,7 +43,7 @@ var findMaxCarbonThisWeek = function(cb){
         });
     }
     else {
-      throw error;
+      console.log(response);
     }
   })
 };
