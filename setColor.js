@@ -1,11 +1,12 @@
 var wifibox = require('./wifibox');
+var getCarbonUpperBound = require('./getCarbonUpperBound');
+
 var commands = require('./commands');
 var request = require('request');
 var moment = require('moment');
 
-// Min:  1099.70458160105
-// Max:  1444.30078329347
-// Avg:  1291.6311845485336
+var weeklyMaxCarbon = 1450;
+var miLightIP = '192.168.1.100';
 
 function getNearestHour() {
   var date = new Date(Date.now()); 
@@ -28,7 +29,7 @@ var getCarbonReading = function(wattimeArray, datestring, cb){
   }
 }
 
-var makeRequest = function(){
+var makeWattTimeRequest = function(){
   var base_url = 'https://api.watttime.org/api/v1/datapoints/?ba=CAISO&market=DAHR'
   var formattedDate = getNearestHour();
   var url = base_url + '&start_at=' + formattedDate;
@@ -53,16 +54,30 @@ var setColorCode = function(carbon){
   // So, multiply % of max by 80 and add the result to 90 to get the correct
   // point in the range.
 
-  //TODO: Calculate this maximum once per day
-  var percentMax = carbon/1450;
+  var percentMax = carbon/weeklyMaxCarbon;
   if(percentMax > 1){percentMax = 1};
 
   var hueOffset = Math.floor(80*percentMax);
   var hue = 80 + hueOffset;
 
   console.log('Setting hue to ' + hue + ' based on carbon ' + carbon);
-  var mylight = new wifibox('192.168.1.100');
+  var mylight = new wifibox(miLightIP);
   mylight.command(commands.rgbw.hue(hue));
 };
 
-makeRequest();
+// makeRequest();
+// 3600000 in an hour
+setTimeout(function(){
+  getCarbonUpperBound(function(maxCarbon){
+    console.log("Max carbon reading this week: ", maxCarbon);
+    weeklyMaxCarbon = maxCarbon;
+  });
+}, 3600000);
+
+setTimeout(makeWattTimeRequest, 600000);
+
+getCarbonUpperBound(function(maxCarbon){
+  console.log("Max carbon reading this week: ", maxCarbon);
+  weeklyMaxCarbon = maxCarbon;
+  makeWattTimeRequest();
+});
