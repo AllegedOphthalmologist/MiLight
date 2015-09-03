@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/andrewrweber/MiLight#readme",
   "dependencies": {
+    "moment": "^2.10.6",
     "request": "^2.61.0"
   }
 }
