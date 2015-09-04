@@ -6,6 +6,7 @@ var request = require('request');
 var moment = require('moment');
 
 var weeklyMaxCarbon = 1405;
+var weeklyMinCarbon = 900;
 var miLightIP = '192.168.1.100';
 
 function getNearestHour() {
@@ -57,8 +58,10 @@ var setColorCode = function(carbon){
   // So, multiply % of max by 80 and add the result to 90 to get the correct
   // point in the range.
 
-  var percentMax = carbon/weeklyMaxCarbon;
+  var carbonRange = weeklyMaxCarbon - weeklyMinCarbon;
+  var percentMax = (carbon - weeklyMinCarbon)/carbonRange;
   if(percentMax > 1){percentMax = 1};
+  if(percentMax < 0){percentMax = 0};
 
   var hueOffset = Math.floor(80*percentMax);
   var hue = 80 + hueOffset;
