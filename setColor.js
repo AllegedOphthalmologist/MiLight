@@ -77,7 +77,7 @@ setTimeout(function(){
 }, 3600000);
 
 // Check for new value every 10 minutes
-setTimeout(makeWattTimeRequest, 600000);
+setInterval(makeWattTimeRequest, 600000);
 
 // Run to set initial value
 makeWattTimeRequest();
