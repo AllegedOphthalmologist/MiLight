@@ -69,7 +69,7 @@ var setColorCode = function(carbon){
 };
 
 // 3600000 Milliseconds in an hour
-setTimeout(function(){
+setInterval(function(){
   getCarbonUpperBound(function(maxCarbon){
     console.log("Max carbon reading this week: ", maxCarbon);
     weeklyMaxCarbon = maxCarbon;
