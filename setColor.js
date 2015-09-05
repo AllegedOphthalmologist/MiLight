@@ -1,5 +1,4 @@
 var wifibox = require('./wifibox');
-var getCarbonUpperBound = require('./getCarbonUpperBound');
 
 var commands = require('./commands');
 var request = require('request');
