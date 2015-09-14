@@ -30,7 +30,5 @@ var setColorCode = function(percentMax){
   mylight.command(commands.rgbw.hue(hue));
 };
 
-// Check for new reading every 10 minutes
-setInterval(makeRequest, 600000)
-// Set value on initial load
 makeRequest();
+
